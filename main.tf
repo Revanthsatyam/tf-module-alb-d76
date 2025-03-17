@@ -10,7 +10,7 @@ resource "aws_lb" "main" {
 
 resource "aws_security_group" "main" {
   name        = var.internal ? "private-alb-sg" : "public-alb-sg"
-  vpc_id      = var.vpc_id
+  vpc_id      = var.internal? var.vpc_id : var.default_vpc_id
   tags = merge(local.tags, { Name = "${var.env}-alb-sg" })
 
   ingress {
