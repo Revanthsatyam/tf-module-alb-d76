@@ -7,6 +7,22 @@ resource "aws_lb" "main" {
   tags               = merge(local.tags, { Name = "${var.env}-alb" })
 }
 
+resource "aws_lb_listener" "main" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = var.sg_port
+  protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Error 404"
+      status_code  = "404"
+    }
+  }
+}
+
 resource "aws_security_group" "main" {
   name   = var.internal ? "private-alb-sg" : "public-alb-sg"
   vpc_id = var.vpc_id
