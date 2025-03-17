@@ -9,7 +9,7 @@ resource "aws_lb" "main" {
 }
 
 resource "aws_security_group" "main" {
-  name        = "${var.env}-alb-sg"
+  name        = var.internal ? "private-alb-sg" : "public-alb-sg"
   vpc_id      = var.vpc_id
 
   tags = merge(local.tags, { Name = "${var.env}-alb-sg" })
