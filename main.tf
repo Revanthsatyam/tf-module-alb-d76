@@ -25,6 +25,23 @@ resource "aws_lb_listener" "main" {
   }
 }
 
+resource "aws_lb_listener" "frontend" {
+  count             = var.internal ? 0 : 1
+  load_balancer_arn = aws_lb.main.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
 resource "aws_security_group" "main" {
   name   = var.internal ? "private-alb-sg" : "public-alb-sg"
   vpc_id = var.vpc_id
@@ -45,4 +62,14 @@ resource "aws_security_group" "main" {
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
+}
+
+resource "aws_security_group_rule" "frontend" {
+  count             = var.internal ? 0 : 1
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = var.ssh_ingress
+  security_group_id = aws_security_group.main.id
 }
